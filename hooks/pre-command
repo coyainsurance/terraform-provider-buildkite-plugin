@@ -1,0 +1,30 @@
+#!/bin/bash
+set -euo pipefail
+
+if [[ "${BUILDKITE_PLUGIN_TERRAFORM_PROVIDER_DEBUG:-false}" =~ (true|on|1) ]]; then
+  echo "--- :hammer: Enabling debug mode"
+  set -x
+fi
+
+OWNER="${BUILDKITE_PLUGIN_TERRAFORM_PROVIDER_REPO%/*}"
+REPO="${BUILDKITE_PLUGIN_TERRAFORM_PROVIDER_REPO#*/}"
+VERSION="${BUILDKITE_PLUGIN_TERRAFORM_PROVIDER_VERSION}"
+ARCH="${BUILDKITE_PLUGIN_TERRAFORM_PROVIDER_ARCH:-linux_amd64}"
+
+echo "--- Getting ${REPO}@${VERSION} :terraform: plugin from :github:"
+URL=$(
+  curl -sL "https://api.github.com/repos/${OWNER}/${REPO}/releases" |
+    jq -r '.[].assets[].browser_download_url' |
+    grep "${ARCH}" |
+    grep "${VERSION}"
+)
+
+echo "Downloading plugin"
+curl -L "${URL}" -o "/tmp/${REPO}_${VERSION}.tar.gz"
+
+mkdir -p "${HOME}/.terraform.d/plugins"
+
+tar -xzf "/tmp/${REPO}_${VERSION}.tar.gz" -C "${HOME}/.terraform.d/plugins"
+
+rm -f "/tmp/${REPO}_${VERSION}.tar.gz"
+echo "Installed ${REPO}@${VERSION}"
