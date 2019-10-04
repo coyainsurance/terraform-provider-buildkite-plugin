@@ -15,24 +15,20 @@ load '/usr/local/lib/bats/load.bash'
 
   stub curl \
     "-sL https://api.github.com/repos/jianyuan/terraform-provider-sentry/releases : cat tests/fixtures/releases.json" \
-    "-L https://github.com/jianyuan/terraform-provider-sentry/releases/download/v0.4.0/terraform-provider-sentry_0.4.0_linux_amd64.tar.gz -o /tmp/terraform-provider-sentry_0.4.0.tar.gz : "
+    "-L https://github.com/jianyuan/terraform-provider-sentry/releases/download/v0.4.0/terraform-provider-sentry_0.4.0_linux_amd64.tar.gz -o /tmp/terraform-provider-sentry_0.4.0.tar.gz : touch /tmp/terraform-provider-sentry_0.4.0.tar.gz"
   stub jq \
     "-r : cat tests/fixtures/releases.txt"
   stub mkdir \
     "-p $HOME/.terraform.d/plugins : "
   stub tar \
     "-xzf /tmp/terraform-provider-sentry_0.4.0.tar.gz -C : "
-  stub rm \
-    "-f /tmp/terraform-provider-sentry_0.4.0.tar.gz : echo 'Remove File'"
-
 
   run "$PWD/hooks/pre-command"
 
-  assert_success
   assert_output --partial "Getting"
   assert_output --partial "Downloading"
   assert_output --partial "Installed"
-  assert_output --partial "Remove File"
+  assert_success
   unstub curl
   unstub mkdir
   unstub tar
