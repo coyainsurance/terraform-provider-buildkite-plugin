@@ -1,0 +1,16 @@
+name: terraform-provider
+description: Installs terraform provider plugins from github releases
+author: https://github.com/coyainsurance
+requirements: [
+  "tar",
+]
+configuration:
+  properties:
+    repo:
+      type: string
+    version:
+      type: string
+  required:
+    - repo
+    - version
+  additionalProperties: false
