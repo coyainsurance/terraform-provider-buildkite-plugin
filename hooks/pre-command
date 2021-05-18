@@ -20,15 +20,21 @@ function buildkite_plugin_terraform_provider() {
       grep "${VERSION}"
   )
 
-  echo "Downloading plugin"
+  echo "Downloading plugin: ${URL}"
   curl -L "${URL}" -o "/tmp/${REPO}_${VERSION}.tar.gz"
 
   mkdir -p "${HOME}/.terraform.d/plugins"
 
-  tar -xzf "/tmp/${REPO}_${VERSION}.tar.gz" -C "${HOME}/.terraform.d/plugins"
-
-  rm -f "/tmp/${REPO}_${VERSION}.tar.gz"
-  echo "Installed ${REPO}@${VERSION}"
+  if [[ ${URL} == *"tar.gz"* ]]; then
+    tar -xzf "/tmp/${REPO}_${VERSION}.tar.gz" -C "${HOME}/.terraform.d/plugins"
+    rm -f "/tmp/${REPO}_${VERSION}.tar.gz"
+    echo "Installed ${REPO}@${VERSION}"
+  elif [[ ${URL} == *"zip"* ]]; then
+    unzip -q -o "/tmp/${REPO}_${VERSION}.tar.gz" -d "${HOME}/.terraform.d/plugins"
+    echo "Installed ${REPO}@${VERSION}"
+  else
+    echo "NOT FOUND"
+  fi
 }
 
 buildkite_plugin_terraform_provider
